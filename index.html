@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OIL WAR ROOM | OILWAR on Solana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080b10;
+      --bg2:      #0d1117;
+      --bg3:      #111820;
+      --gold:     #c9a84c;
+      --gold-lt:  #e6c97a;
+      --green:    #1e3a2f;
+      --green-lt: #2c5240;
+      --text:     #d4cfc8;
+      --muted:    #6b7280;
+      --border:   #1f2d1f;
+      --ff-head:  'Bebas Neue', sans-serif;
+      --ff-mono:  'IBM Plex Mono', monospace;
+      --ff-body:  'IBM Plex Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--ff-body);
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── MAP BACKGROUND ─────────────────────────────── */
+    .map-bg {
+      position: absolute; inset: 0; overflow: hidden; z-index: 0;
+    }
+    .map-bg svg {
+      width: 100%; height: 100%;
+      opacity: 0.045;
+      fill: var(--gold);
+    }
+
+    /* ── NAV ────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(8,11,16,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .nav-logo {
+      font-family: var(--ff-head);
+      font-size: 1.4rem;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-family: var(--ff-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ── HERO ───────────────────────────────────────── */
+    header {
+      position: relative;
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 8rem 2.5rem 5rem;
+      overflow: hidden;
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 680px;
+    }
+    .hero-eyebrow {
+      font-family: var(--ff-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-family: var(--ff-head);
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      line-height: 0.95;
+      letter-spacing: 0.04em;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+    h1 span { color: var(--gold); }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text);
+      opacity: 0.8;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+    .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      font-family: var(--ff-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      border: none; cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: #080b10;
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+    }
+    .btn-outline:hover { background: rgba(201,168,76,0.1); transform: translateY(-2px); }
+
+    /* Hero decoration lines */
+    .hero-line {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      width: 38%;
+      background: linear-gradient(135deg, transparent 0%, rgba(201,168,76,0.03) 40%, transparent 100%);
+      border-left: 1px solid rgba(201,168,76,0.07);
+      z-index: 0;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: 0;
+    }
+    .vignette {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(8,11,16,0.85) 80%);
+    }
+
+    /* ── TICKER ─────────────────────────────────────── */
+    .ticker-wrap {
+      background: var(--green);
+      border-top: 1px solid rgba(201,168,76,0.2);
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+      overflow: hidden;
+      padding: 0.6rem 0;
+    }
+    .ticker-track {
+      display: flex; gap: 4rem;
+      animation: ticker 28s linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      font-family: var(--ff-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+    }
+    .ticker-item span { color: var(--muted); margin: 0 0.5rem; }
+
+    /* ── SECTION BASICS ─────────────────────────────── */
+    section { padding: 6rem 2.5rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--ff-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-family: var(--ff-head);
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      letter-spacing: 0.04em;
+      color: #fff;
+      margin-bottom: 2rem;
+      line-height: 1.05;
+    }
+    h2 span { color: var(--gold); }
+    p { color: var(--text); opacity: 0.85; margin-bottom: 1rem; }
+
+    /* ── STORY ──────────────────────────────────────── */
+    #story { background: var(--bg2); }
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .story-stat {
+      border-top: 1px solid rgba(201,168,76,0.25);
+      padding-top: 1.5rem;
+      margin-top: 2rem;
+    }
+    .story-stat .num {
+      font-family: var(--ff-head);
+      font-size: 3rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .story-stat .label {
+      font-family: var(--ff-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .story-stats { display: flex; gap: 3rem; flex-wrap: wrap; }
+
+    /* ── TOKEN INFO ─────────────────────────────────── */
+    #token { background: var(--bg); }
+    .token-card {
+      background: var(--bg3);
+      border: 1px solid rgba(201,168,76,0.15);
+      padding: 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+    .token-row { border-right: 1px solid rgba(201,168,76,0.1); padding-right: 2rem; }
+    .token-row:last-child { border-right: none; padding-right: 0; }
+    .token-key {
+      font-family: var(--ff-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .token-val {
+      font-family: var(--ff-mono);
+      font-size: 0.95rem;
+      color: var(--gold-lt);
+      word-break: break-all;
+    }
+    .contract-note {
+      font-family: var(--ff-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 1.5rem;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding-top: 1rem;
+    }
+
+    /* ── HOW TO BUY ─────────────────────────────────── */
+    #buy { background: var(--bg2); }
+    .steps { display: flex; flex-direction: column; gap: 1.5rem; max-width: 700px; }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      padding: 1.5rem;
+      background: var(--bg3);
+      border: 1px solid rgba(201,168,76,0.1);
+      transition: border-color 0.2s;
+    }
+    .step:hover { border-color: rgba(201,168,76,0.3); }
+    .step-num {
+      font-family: var(--ff-head);
+      font-size: 2.2rem;
+      color: var(--gold);
+      line-height: 1;
+      min-width: 2rem;
+    }
+    .step-title {
+      font-family: var(--ff-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+    .step p { font-size: 0.9rem; margin: 0; }
+
+    /* ── NARRATIVE ──────────────────────────────────── */
+    #narrative { background: var(--bg); }
+    .narrative-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .nar-card {
+      background: var(--green);
+      border: 1px solid var(--border);
+      padding: 1.8rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .nar-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-3px); }
+    .nar-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .nar-title {
+      font-family: var(--ff-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+    .nar-card p { font-size: 0.88rem; margin: 0; }
+
+    /* ── SOCIALS ────────────────────────────────────── */
+    #socials { background: var(--bg2); text-align: center; }
+    .social-btns {
+      display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+    .social-btn {
+      font-family: var(--ff-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.35);
+      padding: 0.8rem 1.8rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      transition: all 0.2s;
+    }
+    .social-btn:hover { background: rgba(201,168,76,0.08); transform: translateY(-2px); }
+
+    /* ── FOOTER ─────────────────────────────────────── */
+    footer {
+      background: #050709;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .footer-logo {
+      font-family: var(--ff-head);
+      font-size: 1.2rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 1rem;
+    }
+    .disclaimer {
+      font-family: var(--ff-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      header { padding: 7rem 1.5rem 4rem; }
+      section { padding: 4rem 1.5rem; }
+      .story-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .token-row { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.1); padding-bottom: 1.5rem; padding-right: 0; }
+      .token-row:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav>
+  <div class="nav-logo">OILWAR</div>
+  <div class="nav-links">
+    <a href="#story">About</a>
+    <a href="#token">Token</a>
+    <a href="#buy">Buy</a>
+    <a href="#socials">Community</a>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header>
+  <div class="hero-grid"></div>
+  <div class="map-bg">
+    <!-- Simplified world map outline SVG -->
+    <svg viewBox="0 0 1440 760" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <!-- North America -->
+      <path d="M120,140 L200,120 L280,110 L320,130 L340,160 L310,200 L290,240 L250,270 L210,260 L180,240 L150,210 L120,180 Z"/>
+      <path d="M200,260 L240,250 L260,280 L250,320 L220,340 L190,310 L185,280 Z"/>
+      <!-- South America -->
+      <path d="M240,360 L290,340 L320,360 L340,410 L330,470 L300,520 L260,530 L230,490 L220,440 L230,400 Z"/>
+      <!-- Europe -->
+      <path d="M620,110 L680,100 L720,120 L730,150 L700,170 L660,165 L630,145 Z"/>
+      <path d="M670,165 L710,160 L730,190 L710,210 L680,200 Z"/>
+      <!-- Africa -->
+      <path d="M640,220 L700,200 L740,220 L760,280 L750,360 L720,420 L680,440 L640,420 L610,360 L600,290 L620,240 Z"/>
+      <!-- Asia -->
+      <path d="M780,100 L900,80 L1020,90 L1100,120 L1120,160 L1080,190 L1020,200 L940,190 L880,170 L820,160 L780,140 Z"/>
+      <path d="M900,200 L980,190 L1040,210 L1060,260 L1020,300 L960,310 L910,280 L890,240 Z"/>
+      <!-- Australia -->
+      <path d="M1060,380 L1140,360 L1200,380 L1220,430 L1190,470 L1130,480 L1070,450 L1050,410 Z"/>
+      <!-- UK/Ireland rough -->
+      <path d="M590,120 L610,110 L620,130 L605,145 Z"/>
+      <!-- Japan -->
+      <path d="M1130,160 L1150,150 L1160,170 L1140,185 Z"/>
+      <!-- Indonesia -->
+      <path d="M1000,340 L1040,330 L1060,350 L1040,365 L1005,358 Z"/>
+      <path d="M1070,345 L1110,335 L1130,350 L1110,368 L1075,360 Z"/>
+    </svg>
+  </div>
+  <div class="vignette"></div>
+  <div class="hero-line"></div>
+
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Solana · OILWAR · On-Chain</div>
+    <h1>JOIN THE<br/><span>OIL WAR</span><br/>ROOM</h1>
+    <p class="hero-sub">
+      Where geopolitics, oil and on-chain volatility collide.
+      A serious memecoin for degens watching the world burn in real time.
+    </p>
+    <div class="btn-row">
+      <!-- TODO: Replace href with your real Pump.fun token URL -->
+      <a class="btn btn-primary" href="https://pump.fun" target="_blank" rel="noopener noreferrer">TRADE OILWAR</a>
+      <!-- TODO: Replace href with your real Dexscreener / chart URL -->
+      <a class="btn btn-outline" href="https://www.dji6930.com/home" target="_blank" rel="noopener noreferrer">VIEW CHART</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ TICKER ═══════════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">OILWAR <span>·</span> SOLANA</span>
+    <span class="ticker-item">GEOPOLITICS ON-CHAIN <span>·</span></span>
+    <span class="ticker-item">OIL MARKETS <span>·</span> WAR HEADLINES</span>
+    <span class="ticker-item">ZERO TAXES <span>·</span> LP LOCKED</span>
+    <span class="ticker-item">ENTER THE WAR ROOM <span>·</span></span>
+    <span class="ticker-item">OILWAR <span>·</span> SOLANA</span>
+    <span class="ticker-item">GEOPOLITICS ON-CHAIN <span>·</span></span>
+    <span class="ticker-item">OIL MARKETS <span>·</span> WAR HEADLINES</span>
+    <span class="ticker-item">ZERO TAXES <span>·</span> LP LOCKED</span>
+    <span class="ticker-item">ENTER THE WAR ROOM <span>·</span></span>
+  </div>
+</div>
+
+<!-- ═══════════════ STORY ═══════════════ -->
+<section id="story">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div>
+        <div class="section-label">// About</div>
+        <h2>What is <span>OIL WAR ROOM</span>?</h2>
+        <p>
+          OIL WAR ROOM (OILWAR) is a Solana memecoin built around the raw energy of geopolitics, oil markets, and war headlines. It lives at the intersection of global chaos and on-chain speculation.
+        </p>
+        <p>
+          Every sanction dropped, every pipeline threatened, every barrel of oil priced into war — OILWAR turns that tension into on-chain volatility and memes for the degens paying attention.
+        </p>
+        <p>
+          This is a purely entertainment and casino-style memecoin. There are no promises of financial returns, no roadmap, no utility. Just the War Room — and the world burning in real time.
+        </p>
+      </div>
+      <div>
+        <div class="story-stats">
+          <div class="story-stat">
+            <div class="num">0/0</div>
+            <div class="label">Buy / Sell Tax</div>
+          </div>
+          <div class="story-stat">
+            <div class="num">SOL</div>
+            <div class="label">Chain</div>
+          </div>
+          <div class="story-stat">
+            <div class="num">🔒</div>
+            <div class="label">LP Locked</div>
+          </div>
+        </div>
+        <div style="margin-top:3rem; padding: 1.5rem; border:1px solid rgba(201,168,76,0.15); background: var(--bg3);">
+          <div class="section-label" style="margin-bottom:0.5rem;">// Thesis</div>
+          <p style="font-size:0.88rem; font-style:italic; opacity:0.7; margin:0;">
+            "The War Room doesn't trade on technicals. It trades on reality — and reality has never been more volatile."
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TOKEN INFO ═══════════════ -->
+<section id="token">
+  <div class="section-inner">
+    <div class="section-label">// Token Info</div>
+    <h2>Token <span>Details</span></h2>
+    <div class="token-card">
+      <div class="token-row">
+        <div class="token-key">Name</div>
+        <div class="token-val">OIL WAR ROOM</div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Ticker</div>
+        <div class="token-val">$OILWAR</div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Chain</div>
+        <div class="token-val">Solana</div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Max Supply</div>
+        <!-- TODO: Replace with real max supply -->
+        <div class="token-val">1,000,000,000</div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Taxes</div>
+        <div class="token-val">0 / 0</div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">LP Status</div>
+        <div class="token-val">🔒 Locked</div>
+      </div>
+    </div>
+    <!-- TODO: Replace the contract address below with the real Solana contract address -->
+    <div class="contract-note">
+      ⚠ Contract Address (TODO — replace with real CA):
+      &nbsp;<span style="color:var(--gold-lt)">So1OILWARxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+      &nbsp;· Always verify on Solscan before trading.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HOW TO BUY ═══════════════ -->
+<section id="buy">
+  <div class="section-inner">
+    <div class="section-label">// Acquire</div>
+    <h2>How to <span>Buy OILWAR</span></h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Install a Solana Wallet</div>
+          <p>Download Phantom or Solflare and create a new wallet. Save your seed phrase somewhere safe — never share it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Get SOL</div>
+          <p>Buy SOL on any major exchange (Coinbase, Binance, Kraken) and transfer it to your Solana wallet address.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">Go to a DEX</div>
+          <!-- TODO: Replace href with your real Pump.fun or Raydium link -->
+          <p>Head to <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" style="color:var(--gold)">Pump.fun</a> or Raydium. Connect your wallet and search for OILWAR.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Paste Contract & Swap</div>
+          <!-- TODO: Replace contract address with real CA -->
+          <p>Search the contract address <span style="font-family:var(--ff-mono); color:var(--gold-lt); font-size:0.82rem">So1OILWARxxxxx...</span>, set slippage, and confirm the swap. Welcome to the War Room.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ NARRATIVE ═══════════════ -->
+<section id="narrative">
+  <div class="section-inner">
+    <div class="section-label">// The Thesis</div>
+    <h2>Geopolitics · Oil · <span>Volatility</span></h2>
+    <div class="narrative-grid">
+      <div class="nar-card">
+        <div class="nar-icon">🛢️</div>
+        <div class="nar-title">Oil Is Power</div>
+        <p>Every barrel priced. Every embargo enforced. Oil has always been the world's most weaponized commodity — and the market moves with every headline.</p>
+      </div>
+      <div class="nar-card">
+        <div class="nar-icon">🎯</div>
+        <div class="nar-title">War Moves Markets</div>
+        <p>Conflict, sanctions, and pipeline threats create the kind of unpredictable volatility that traditional finance tries to hedge. OILWAR leans into it.</p>
+      </div>
+      <div class="nar-card">
+        <div class="nar-icon">📡</div>
+        <div class="nar-title">Real-Time Intelligence</div>
+        <p>The War Room watches the world. Degens in the community track oil prices, conflict zones, and sanctions in real time — all turned into on-chain narrative.</p>
+      </div>
+      <div class="nar-card">
+        <div class="nar-icon">⚡</div>
+        <div class="nar-title">On-Chain Speed</div>
+        <p>Solana settles in milliseconds. By the time the news hits your feed, OILWAR is already moving. This is the fastest casino on the fastest chain.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SOCIALS ═══════════════ -->
+<section id="socials">
+  <div class="section-inner">
+    <div class="section-label">// Community</div>
+    <h2>Join the <span>War Room</span></h2>
+    <p style="max-width:500px; margin:0 auto 1rem;">The War Room is where it happens. Follow for real-time geopolitical alpha, meme drops, and community calls.</p>
+    <div class="social-btns">
+      <!-- TODO: Replace href="#" with real social links -->
+      <a class="social-btn" href="https://x.com/OilWar_Coin" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.261 5.632 5.903-5.632Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
+        X / Twitter
+      </a>
+      <a class="social-btn" href="https://t.me/OILWARCOIN" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Telegram
+      </a>
+      <a class="social-btn" href="https://discord.gg/pMQ4AYVm3D" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Discord
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="footer-logo">OIL WAR ROOM</div>
+  <p class="disclaimer">
+    OIL WAR ROOM (OILWAR) is a high-risk Solana memecoin created for on-chain entertainment purposes only.
+    This website and its content do not constitute financial advice, investment advice, or any form of recommendation.
+    Cryptocurrency investments are highly speculative and you may lose all funds. Always do your own research (DYOR).
+    <!-- TODO: Replace with real contract address below -->
+    Contract: So1OILWARxxxxxxxxxxxxxxxxxxxxxxxxxxxx (TO BE UPDATED)
+  </p>
+</footer>
+
+</body>
+</html>
